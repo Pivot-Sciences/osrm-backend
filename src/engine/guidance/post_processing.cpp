@@ -389,15 +389,10 @@ void collapseTurnAt(std::vector<RouteStep> &steps,
     };
 
     BOOST_ASSERT(!one_back_step.intersections.empty() && !current_step.intersections.empty());
-    const auto isCollapsableInstruction = [](const TurnInstruction instruction) {
-        return instruction.type == TurnType::NewName || instruction.type == TurnType::UseLane ||
-               (instruction.type == TurnType::Turn &&
-                instruction.direction_modifier == DirectionModifier::Straight);
-    };
     std::cout << "At: " << step_index << std::endl;
     print(steps);
     // Very Short New Name
-    if (collapsable(one_back_step))
+    if (isCollapsableInstruction(one_back_step.maneuver.instruction))
     {
         BOOST_ASSERT(two_back_index < steps.size());
         if (compatible(one_back_step, steps[two_back_index]))
@@ -628,13 +623,6 @@ std::vector<RouteStep> collapseTurns(std::vector<RouteStep> steps)
             --index;
         }
         return index;
-    };
-
-    // TODO needs to check whether lane data is required!
-    const auto isCollapsableInstruction = [](const TurnInstruction instruction) {
-        return instruction.type == TurnType::NewName || instruction.type == TurnType::UseLane ||
-               (instruction.type == TurnType::Turn &&
-                instruction.direction_modifier == DirectionModifier::Straight);
     };
 
     // a series of turns is only possible to collapse if its only name changes and suppressed turns.
