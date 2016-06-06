@@ -73,11 +73,15 @@ void invalidateStep(RouteStep &step) { step = getInvalidRouteStep(); }
 void print(const RouteStep &step)
 {
     std::cout << static_cast<int>(step.maneuver.instruction.type) << " "
-              << static_cast<int>(step.maneuver.instruction.direction_modifier) << "  "
-              << static_cast<int>(step.maneuver.waypoint_type) << " Duration: " << step.duration
-              << " Distance: " << step.distance << " Geometry: " << step.geometry_begin << " "
-              << step.geometry_end << " exit: " << step.maneuver.exit
-              << " Intersections: " << step.intersections.size() << " [";
+              << static_cast<int>(step.maneuver.instruction.direction_modifier) << " "
+              << static_cast<int>(step.maneuver.waypoint_type)
+              << " Lanes: " << static_cast<int>(step.maneuver.instruction.lane_tupel.lanes_in_turn)
+              << " "
+              << static_cast<int>(step.maneuver.instruction.lane_tupel.first_lane_from_the_right)
+              << " Duration: " << step.duration << " Distance: " << step.distance
+              << " Geometry: " << step.geometry_begin << " " << step.geometry_end
+              << " exit: " << step.maneuver.exit << " Intersections: " << step.intersections.size()
+              << " [";
 
     for (const auto &intersection : step.intersections)
     {
@@ -386,8 +390,7 @@ void collapseTurnAt(std::vector<RouteStep> &steps,
 
     BOOST_ASSERT(!one_back_step.intersections.empty() && !current_step.intersections.empty());
     const auto isCollapsableInstruction = [](const TurnInstruction instruction) {
-        return instruction.type == TurnType::NewName ||
-               instruction.type == TurnType::UseLane ||
+        return instruction.type == TurnType::NewName || instruction.type == TurnType::UseLane ||
                (instruction.type == TurnType::Turn &&
                 instruction.direction_modifier == DirectionModifier::Straight);
     };
@@ -627,10 +630,9 @@ std::vector<RouteStep> collapseTurns(std::vector<RouteStep> steps)
         return index;
     };
 
-    //TODO needs to check whether lane data is required!
+    // TODO needs to check whether lane data is required!
     const auto isCollapsableInstruction = [](const TurnInstruction instruction) {
-        return instruction.type == TurnType::NewName ||
-                instruction.type == TurnType::UseLane ||
+        return instruction.type == TurnType::NewName || instruction.type == TurnType::UseLane ||
                (instruction.type == TurnType::Turn &&
                 instruction.direction_modifier == DirectionModifier::Straight);
     };
