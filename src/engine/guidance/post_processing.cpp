@@ -4,6 +4,7 @@
 #include "engine/guidance/assemble_steps.hpp"
 #include "engine/guidance/toolkit.hpp"
 
+#include "util/group_by.hpp"
 #include "util/guidance/toolkit.hpp"
 
 #include <boost/assert.hpp>
@@ -1056,17 +1057,12 @@ std::vector<RouteStep> anticipateLaneChange(std::vector<RouteStep> steps)
 
     std::vector<StepIterRange> quick_turns;
 
-    for (auto it = begin(steps), last = end(steps); it != last; /*update below*/)
-    {
-        // Jump _to_ the first quick turn
-        it = std::find_if(it, last, is_quick_turn);
-        // then _over_ all quick turns
-        auto next = std::find_if_not(it, last, is_quick_turn);
-        // and store the range of all subsequent quick turns
-        quick_turns.emplace_back(it, next);
+    const auto keep_turn_range = [&](const StepIterRange range) {
+        if (std::distance(range.first, range.second) > 1)
+            quick_turns.push_back(std::move(range));
+    };
 
-        it = next;
-    }
+    util::group_by(begin(steps), end(steps), is_quick_turn, keep_turn_range);
 
     // TODO(daniel-j-h): remove
     std::cout << "Number of quick-turn ranges: " << quick_turns.size() << std::endl;
