@@ -1,5 +1,5 @@
-#include "extractor/guidance/turn_instruction.hpp"
 #include "engine/guidance/post_processing.hpp"
+#include "extractor/guidance/turn_instruction.hpp"
 
 #include "engine/guidance/assemble_steps.hpp"
 #include "engine/guidance/toolkit.hpp"
@@ -1036,26 +1036,45 @@ std::vector<RouteStep> anticipateLaneChange(std::vector<RouteStep> steps)
 {
     const constexpr auto MIN_DURATION_NEEDED_FOR_LANE_CHANGE = 5.;
 
-    for (const auto &step : steps)
+    // Postprocessing does not strictly guarantee for only turns
+    const auto is_turn = [](const RouteStep &step) {
+        return step.maneuver.instruction.type != TurnType::NewName &&
+               step.maneuver.instruction.type != TurnType::Notification;
+    };
+
+    const auto is_quick = [](const RouteStep &step) {
+        return step.duration < MIN_DURATION_NEEDED_FOR_LANE_CHANGE;
+    };
+
+    const auto is_quick_turn = [&](const RouteStep &step) {
+        return is_turn(step) && is_quick(step);
+    };
+
+    // Determine range of subsequent quick turns, candidates for possible lane anticipation
+    using StepIter = decltype(steps)::iterator;
+    using StepIterRange = std::pair<StepIter, StepIter>;
+
+    std::vector<StepIterRange> quick_turns;
+
+    for (auto it = begin(steps), last = end(steps); it != last; /*update below*/)
     {
-        const auto turn_instruction = step.maneuver.instruction;
-        const auto number_of_lanes = turn_instruction.lane_tupel.lanes_in_turn;
-        const auto first_lane = turn_instruction.lane_tupel.first_lane_from_the_right;
+        // Jump _to_ the first quick turn
+        it = std::find_if(it, last, is_quick_turn);
+        // then _over_ all quick turns
+        auto next = std::find_if_not(it, last, is_quick_turn);
+        // and store the range of all subsequent quick turns
+        quick_turns.emplace_back(it, next);
 
-        if (number_of_lanes > 0)
-        {
-            std::cout << "#lanes: " << (int)number_of_lanes << ", lane: " << (int)first_lane
-                      << std::endl;
-        }
+        it = next;
+    }
 
-        if (step.duration < MIN_DURATION_NEEDED_FOR_LANE_CHANGE)
-        {
-            std::cout << ">>> quick lane change" << std::endl;
-        }
-        else
-        {
-            std::cout << ">>> NOT A quick lane change" << std::endl;
-        }
+    // TODO(daniel-j-h): remove
+    std::cout << "Number of quick-turn ranges: " << quick_turns.size() << std::endl;
+    for (const auto &each : quick_turns)
+    {
+        for (auto it = each.first, last = each.second; it != last; ++it)
+            print(*it);
+        std::cout << std::endl;
     }
 
     return steps;
