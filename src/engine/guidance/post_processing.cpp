@@ -390,12 +390,9 @@ void collapseTurnAt(std::vector<RouteStep> &steps,
     };
 
     BOOST_ASSERT(!one_back_step.intersections.empty() && !current_step.intersections.empty());
-    std::cout << "At: " << step_index << std::endl;
-    print(steps);
     // Very Short New Name/suppressed segment prior to turn
     if (collapsable(one_back_step)) // isCollapsableInstruction(one_back_step.maneuver.instruction))
     {
-        std::cout << "First" << std::endl;
         BOOST_ASSERT(two_back_index < steps.size());
         if (compatible(one_back_step, steps[two_back_index]))
         {
@@ -507,7 +504,6 @@ void collapseTurnAt(std::vector<RouteStep> &steps,
              compatible(one_back_step, current_step))
 
     {
-        print(steps);
         BOOST_ASSERT(two_back_index < steps.size());
         // the simple case is a u-turn that changes directly into the in-name again
         const bool direct_u_turn = steps[two_back_index].name == current_step.name;
@@ -850,7 +846,6 @@ std::vector<RouteStep> collapseTurns(std::vector<RouteStep> steps)
 // usually not be as relevant.
 void trimShortSegments(std::vector<RouteStep> &steps, LegGeometry &geometry)
 {
-    print(steps);
     if (steps.size() < 2 || geometry.locations.size() <= 2)
         return;
 
