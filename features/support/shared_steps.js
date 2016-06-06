@@ -33,7 +33,7 @@ module.exports = function () {
                 var afterRequest = (err, res, body) => {
                     if (err) return cb(err);
                     if (body && body.length) {
-                        let destinations, pronunciations, instructions, bearings, turns, modes, times, distances, summary, intersections;
+                        let destinations, pronunciations, instructions, bearings, turns, modes, times, distances, summary, intersections, lanes;
 
                         let json = JSON.parse(body);
 
