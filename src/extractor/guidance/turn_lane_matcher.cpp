@@ -430,12 +430,12 @@ Intersection TurnLaneMatcher::assignTurnLanes(const EdgeID via_edge,
                 return simpleMatchTuplesToTurns(std::move(intersection), num_lanes, lane_data);
             }
         }
-
-        for (auto &road : intersection)
-            road.turn.instruction.lane_tupel = {0, INVALID_LANEID};
-
-        return intersection;
     }
+
+    for (auto &road : intersection)
+        road.turn.instruction.lane_tupel = {0, INVALID_LANEID};
+
+    return intersection;
 }
 
 /*
@@ -844,7 +844,7 @@ TurnLaneMatcher::partitionLaneData(const NodeID at,
                     auto best_match_at_next_intersection =
                         detail::findBestMatch(lane_data.tag, next_intersection);
                     if (!detail::isValidMatch(lane_data.tag,
-                                             best_match_at_next_intersection->turn.instruction))
+                                              best_match_at_next_intersection->turn.instruction))
                     {
                         can_match_all_items = false;
                     }
