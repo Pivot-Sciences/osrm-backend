@@ -389,6 +389,11 @@ void collapseTurnAt(std::vector<RouteStep> &steps,
     };
 
     BOOST_ASSERT(!one_back_step.intersections.empty() && !current_step.intersections.empty());
+    const auto isCollapsableInstruction = [](const TurnInstruction instruction) {
+        return instruction.type == TurnType::NewName || instruction.type == TurnType::UseLane ||
+               (instruction.type == TurnType::Turn &&
+                instruction.direction_modifier == DirectionModifier::Straight);
+    };
     std::cout << "At: " << step_index << std::endl;
     print(steps);
     // Very Short New Name
@@ -623,6 +628,13 @@ std::vector<RouteStep> collapseTurns(std::vector<RouteStep> steps)
             --index;
         }
         return index;
+    };
+
+    // TODO needs to check whether lane data is required!
+    const auto isCollapsableInstruction = [](const TurnInstruction instruction) {
+        return instruction.type == TurnType::NewName || instruction.type == TurnType::UseLane ||
+               (instruction.type == TurnType::Turn &&
+                instruction.direction_modifier == DirectionModifier::Straight);
     };
 
     // a series of turns is only possible to collapse if its only name changes and suppressed turns.
@@ -1017,6 +1029,35 @@ std::vector<RouteStep> assignRelativeLocations(std::vector<RouteStep> steps,
     BOOST_ASSERT(steps.back().intersections.front().bearings.size() == 1);
     BOOST_ASSERT(steps.back().intersections.front().entry.size() == 1);
     BOOST_ASSERT(steps.back().maneuver.waypoint_type == WaypointType::Arrive);
+    return steps;
+}
+
+std::vector<RouteStep> anticipateLaneChange(std::vector<RouteStep> steps)
+{
+    const constexpr auto MIN_DURATION_NEEDED_FOR_LANE_CHANGE = 5.;
+
+    for (const auto &step : steps)
+    {
+        const auto turn_instruction = step.maneuver.instruction;
+        const auto number_of_lanes = turn_instruction.lane_tupel.lanes_in_turn;
+        const auto first_lane = turn_instruction.lane_tupel.first_lane_from_the_right;
+
+        if (number_of_lanes > 0)
+        {
+            std::cout << "#lanes: " << (int)number_of_lanes << ", lane: " << (int)first_lane
+                      << std::endl;
+        }
+
+        if (step.duration < MIN_DURATION_NEEDED_FOR_LANE_CHANGE)
+        {
+            std::cout << ">>> quick lane change" << std::endl;
+        }
+        else
+        {
+            std::cout << ">>> NOT A quick lane change" << std::endl;
+        }
+    }
+
     return steps;
 }
 
