@@ -1066,10 +1066,20 @@ std::vector<RouteStep> anticipateLaneChange(std::vector<RouteStep> steps)
 
     // TODO(daniel-j-h): remove
     std::cout << "Number of quick-turn ranges: " << quick_turns.size() << std::endl;
+
     for (const auto &each : quick_turns)
     {
         for (auto it = each.first, last = each.second; it != last; ++it)
-            print(*it);
+        {
+            const auto &step = *it;
+
+            const auto lanes = step.maneuver.instruction.lane_tupel;
+            const auto number_of_lanes = lanes.lanes_in_turn;
+            const auto first_lane_id = lanes.first_lane_from_the_right;
+
+            if (number_of_lanes > 0)
+              std::cout << ">>> #lanes: " << int(number_of_lanes) << ", firstLaneId: " << int(first_lane_id) << std::endl;
+        }
         std::cout << std::endl;
     }
 
