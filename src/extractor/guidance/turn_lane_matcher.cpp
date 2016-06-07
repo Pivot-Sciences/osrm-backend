@@ -351,7 +351,7 @@ Intersection TurnLaneMatcher::assignTurnLanes(const EdgeID via_edge,
         }
         else if (!previous_lane_string.empty())
         {
-            if (lane_data.size() > detail::getNumberOfTurns(intersection))
+            if (lane_data.size() > detail::getNumberOfTurns(previous_intersection))
             {
                 lane_data = partitionLaneData(node_based_graph.GetTarget(previous_id),
                                               std::move(lane_data),
@@ -431,11 +431,13 @@ Intersection TurnLaneMatcher::assignTurnLanes(const EdgeID via_edge,
             }
         }
     }
+    else
+    {
+        for (auto &road : intersection)
+            road.turn.instruction.lane_tupel = {0, INVALID_LANEID};
 
-    for (auto &road : intersection)
-        road.turn.instruction.lane_tupel = {0, INVALID_LANEID};
-
-    return intersection;
+        return intersection;
+    }
 }
 
 /*
