@@ -418,6 +418,7 @@ void EdgeBasedGraphFactory::GenerateEdgeExpandedEdges(
 
                 // the following is the core of the loop.
                 unsigned distance = edge_data1.distance;
+                DistanceData distance_data = edge_data1.distance_data;
                 if (m_traffic_lights.find(node_v) != m_traffic_lights.end())
                 {
                     distance += profile_properties.traffic_signal_penalty;
@@ -460,7 +461,8 @@ void EdgeBasedGraphFactory::GenerateEdgeExpandedEdges(
                                                     m_edge_based_edge_list.size(),
                                                     distance,
                                                     true,
-                                                    false);
+                                                    false,
+                                                    distance_data);
 
                 // Here is where we write out the mapping between the edge-expanded edges, and
                 // the node-based edges that are originally used to calculate the `distance`

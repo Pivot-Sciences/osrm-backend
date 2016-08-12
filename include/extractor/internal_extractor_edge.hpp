@@ -51,7 +51,8 @@ struct InternalExtractorEdge
                  TRAVEL_MODE_INACCESSIBLE,
                  false,
                  guidance::TurnLaneType::empty,
-                 guidance::RoadClassification())
+                 guidance::RoadClassification(),
+                 DistanceData())
     {
     }
 
@@ -80,7 +81,8 @@ struct InternalExtractorEdge
                  travel_mode,
                  is_split,
                  lane_description,
-                 std::move(road_classification)),
+                 std::move(road_classification),
+                 DistanceData()),
           weight_data(std::move(weight_data))
     {
     }

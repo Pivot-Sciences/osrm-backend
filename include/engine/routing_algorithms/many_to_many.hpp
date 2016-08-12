@@ -25,14 +25,16 @@ class ManyToManyRouting final
 {
     using super = BasicRoutingInterface<DataFacadeT, ManyToManyRouting<DataFacadeT>>;
     using QueryHeap = SearchEngineData::QueryHeap;
+    using NodeDistances = std::unordered_map<NodeID, DistanceData>;
     SearchEngineData &engine_working_data;
 
     struct NodeBucket
     {
         unsigned target_id; // essentially a row in the distance matrix
         EdgeWeight distance;
-        NodeBucket(const unsigned target_id, const EdgeWeight distance)
-            : target_id(target_id), distance(distance)
+        DistanceData distance_data;
+        NodeBucket(const unsigned target_id, const EdgeWeight distance, const DistanceData & distance_data)
+            : target_id(target_id), distance(distance), distance_data(distance_data)
         {
         }
     };
@@ -40,13 +42,27 @@ class ManyToManyRouting final
     // FIXME This should be replaced by an std::unordered_multimap, though this needs benchmarking
     using SearchSpaceWithBuckets = std::unordered_map<NodeID, std::vector<NodeBucket>>;
 
+    using ResultEntry = std::pair<EdgeWeight,DistanceData>;
   public:
     ManyToManyRouting(DataFacadeT *facade, SearchEngineData &engine_working_data)
         : super(facade), engine_working_data(engine_working_data)
     {
     }
+    
+     std::vector<EdgeWeight> durations(const std::vector<PhantomNode> &phantom_nodes,
+                                       const std::vector<std::size_t> &source_indices,
+                                       const std::vector<std::size_t> &target_indices) const
+    {
+      std::vector<ResultEntry> table = operator()(phantom_nodes, source_indices, target_indices);
+      std::vector<EdgeWeight> durations;
+      std::transform(table.begin(), 
+               table.end(), 
+               std::back_inserter(durations), 
+               [](const ResultEntry& e) { return e.first; });
+      return durations;
+    }
 
-    std::vector<EdgeWeight> operator()(const std::vector<PhantomNode> &phantom_nodes,
+    std::vector<ResultEntry> operator()(const std::vector<PhantomNode> &phantom_nodes,
                                        const std::vector<std::size_t> &source_indices,
                                        const std::vector<std::size_t> &target_indices) const
     {
@@ -55,19 +71,22 @@ class ManyToManyRouting final
         const auto number_of_targets =
             target_indices.empty() ? phantom_nodes.size() : target_indices.size();
         const auto number_of_entries = number_of_sources * number_of_targets;
-        std::vector<EdgeWeight> result_table(number_of_entries,
-                                             std::numeric_limits<EdgeWeight>::max());
+
+        std::vector<ResultEntry> result_table(number_of_entries,
+                                             std::make_pair(std::numeric_limits<EdgeWeight>::max(), INVALID_DISTANCE_DATA));
 
         engine_working_data.InitializeOrClearFirstThreadLocalStorage(
             super::facade->GetNumberOfNodes());
 
         QueryHeap &query_heap = *(engine_working_data.forward_heap_1);
+        NodeDistances heap_node_distances;
 
         SearchSpaceWithBuckets search_space_with_buckets;
 
         unsigned column_idx = 0;
         const auto search_target_phantom = [&](const PhantomNode &phantom) {
             query_heap.Clear();
+            heap_node_distances.clear();
             // insert target(s) at distance 0
 
             if (phantom.forward_segment_id.enabled)
@@ -75,18 +94,20 @@ class ManyToManyRouting final
                 query_heap.Insert(phantom.forward_segment_id.id,
                                   phantom.GetForwardWeightPlusOffset(),
                                   phantom.forward_segment_id.id);
+                heap_node_distances[phantom.forward_segment_id.id] = phantom.forward_distance_data;
             }
             if (phantom.reverse_segment_id.enabled)
             {
                 query_heap.Insert(phantom.reverse_segment_id.id,
                                   phantom.GetReverseWeightPlusOffset(),
                                   phantom.reverse_segment_id.id);
+                heap_node_distances[phantom.reverse_segment_id.id] = phantom.reverse_distance_data;
             }
 
             // explore search space
             while (!query_heap.Empty())
             {
-                BackwardRoutingStep(column_idx, query_heap, search_space_with_buckets);
+                BackwardRoutingStep(column_idx, query_heap, heap_node_distances, search_space_with_buckets);
             }
             ++column_idx;
         };
@@ -95,6 +116,7 @@ class ManyToManyRouting final
         unsigned row_idx = 0;
         const auto search_source_phantom = [&](const PhantomNode &phantom) {
             query_heap.Clear();
+            heap_node_distances.clear();
             // insert target(s) at distance 0
 
             if (phantom.forward_segment_id.enabled)
@@ -102,12 +124,14 @@ class ManyToManyRouting final
                 query_heap.Insert(phantom.forward_segment_id.id,
                                   -phantom.GetForwardWeightPlusOffset(),
                                   phantom.forward_segment_id.id);
+                heap_node_distances[phantom.forward_segment_id.id] = -phantom.forward_distance_data;
             }
             if (phantom.reverse_segment_id.enabled)
             {
                 query_heap.Insert(phantom.reverse_segment_id.id,
                                   -phantom.GetReverseWeightPlusOffset(),
                                   phantom.reverse_segment_id.id);
+                heap_node_distances[phantom.reverse_segment_id.id] = -phantom.reverse_distance_data;
             }
 
             // explore search space
@@ -116,6 +140,7 @@ class ManyToManyRouting final
                 ForwardRoutingStep(row_idx,
                                    number_of_targets,
                                    query_heap,
+                                   heap_node_distances, 
                                    search_space_with_buckets,
                                    result_table);
             }
@@ -160,11 +185,14 @@ class ManyToManyRouting final
     void ForwardRoutingStep(const unsigned row_idx,
                             const unsigned number_of_targets,
                             QueryHeap &query_heap,
+                            NodeDistances & heap_node_distances,
                             const SearchSpaceWithBuckets &search_space_with_buckets,
-                            std::vector<EdgeWeight> &result_table) const
+                            std::vector<ResultEntry> &result_table) const
     {
         const NodeID node = query_heap.DeleteMin();
         const int source_distance = query_heap.GetKey(node);
+        const DistanceData source_distance_data = heap_node_distances[node];
+        heap_node_distances.erase(node);
 
         // check if each encountered node has an entry
         const auto bucket_iterator = search_space_with_buckets.find(node);
@@ -177,21 +205,24 @@ class ManyToManyRouting final
                 // get target id from bucket entry
                 const unsigned column_idx = current_bucket.target_id;
                 const int target_distance = current_bucket.distance;
-                auto &current_distance = result_table[row_idx * number_of_targets + column_idx];
+                auto &current_distance = result_table[row_idx * number_of_targets + column_idx].first;
                 // check if new distance is better
                 const EdgeWeight new_distance = source_distance + target_distance;
                 if (new_distance < 0)
                 {
-                    const EdgeWeight loop_weight = super::GetLoopWeight(node);
+                    const std::pair<EdgeWeight,DistanceData> loop_weight_and_distance = super::GetLoopWeightAndDistance(node);
+                    const int & loop_weight = loop_weight_and_distance.first;
                     const int new_distance_with_loop = new_distance + loop_weight;
-                    if (loop_weight != INVALID_EDGE_WEIGHT && new_distance_with_loop >= 0)
+                    if (loop_weight != INVALID_EDGE_WEIGHT && new_distance_with_loop >= 0 && new_distance_with_loop < current_distance)
                     {
-                        current_distance = std::min(current_distance, new_distance_with_loop);
+                        const DistanceData new_path_distance_data = source_distance_data + current_bucket.distance_data + loop_weight_and_distance.second;
+                        result_table[row_idx * number_of_targets + column_idx] = std::make_pair(new_distance_with_loop, new_path_distance_data);
                     }
                 }
                 else if (new_distance < current_distance)
                 {
-                    result_table[row_idx * number_of_targets + column_idx] = new_distance;
+                    const DistanceData new_path_distance_data = source_distance_data + current_bucket.distance_data;
+                    result_table[row_idx * number_of_targets + column_idx] = std::make_pair(new_distance, new_path_distance_data);
                 }
             }
         }
@@ -199,30 +230,33 @@ class ManyToManyRouting final
         {
             return;
         }
-        RelaxOutgoingEdges<true>(node, source_distance, query_heap);
+        RelaxOutgoingEdges<true>(node, source_distance, source_distance_data, query_heap, heap_node_distances);
     }
 
     void BackwardRoutingStep(const unsigned column_idx,
                              QueryHeap &query_heap,
+                             NodeDistances & heap_node_distances,
                              SearchSpaceWithBuckets &search_space_with_buckets) const
     {
         const NodeID node = query_heap.DeleteMin();
         const int target_distance = query_heap.GetKey(node);
+        const DistanceData target_distance_data = heap_node_distances[node];
+        heap_node_distances.erase(node);
 
         // store settled nodes in search space bucket
-        search_space_with_buckets[node].emplace_back(column_idx, target_distance);
+        search_space_with_buckets[node].emplace_back(column_idx, target_distance, target_distance_data);
 
         if (StallAtNode<false>(node, target_distance, query_heap))
         {
             return;
         }
 
-        RelaxOutgoingEdges<false>(node, target_distance, query_heap);
+        RelaxOutgoingEdges<false>(node, target_distance, target_distance_data, query_heap, heap_node_distances);
     }
 
     template <bool forward_direction>
     inline void
-    RelaxOutgoingEdges(const NodeID node, const EdgeWeight distance, QueryHeap &query_heap) const
+    RelaxOutgoingEdges(const NodeID node, const EdgeWeight distance, const DistanceData & distance_data, QueryHeap &query_heap, NodeDistances & heap_node_distances) const
     {
         for (auto edge : super::facade->GetAdjacentEdgeRange(node))
         {
@@ -232,14 +266,17 @@ class ManyToManyRouting final
             {
                 const NodeID to = super::facade->GetTarget(edge);
                 const int edge_weight = data.distance;
+                const DistanceData & edge_distance_data = data.distance_data;
 
                 BOOST_ASSERT_MSG(edge_weight > 0, "edge_weight invalid");
                 const int to_distance = distance + edge_weight;
+                const DistanceData to_distance_data = distance_data + edge_distance_data;
 
                 // New Node discovered -> Add to Heap + Node Info Storage
                 if (!query_heap.WasInserted(to))
                 {
                     query_heap.Insert(to, to_distance, node);
+                    heap_node_distances[to] = to_distance_data;
                 }
                 // Found a shorter Path -> Update distance
                 else if (to_distance < query_heap.GetKey(to))
@@ -247,6 +284,7 @@ class ManyToManyRouting final
                     // new parent
                     query_heap.GetData(to).parent = node;
                     query_heap.DecreaseKey(to, to_distance);
+                    heap_node_distances[to] = to_distance_data;
                 }
             }
         }
