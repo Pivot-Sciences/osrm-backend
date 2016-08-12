@@ -137,15 +137,9 @@ BOOST_AUTO_TEST_CASE(valid_route_urls)
     CHECK_EQUAL_RANGE(reference_3.hints, result_3->hints);
 
     std::vector<boost::optional<engine::Hint>> hints_4 = {
-        engine::Hint::FromBase64("DAIAgP___"
-                                 "38AAAAAAAAAAAIAAAAAAAAAEAAAAOgDAAD0AwAAGwAAAOUacQBQP5sCshpxAB0_"
-                                 "mwIAAAEBl-Umfg=="),
-        engine::Hint::FromBase64("cgAAgP___"
-                                 "39jAAAADgAAACIAAABeAAAAkQAAANoDAABOAgAAGwAAAFVGcQCiRJsCR0VxAOZFmw"
-                                 "IFAAEBl-Umfg=="),
-        engine::Hint::FromBase64("3gAAgP___"
-                                 "39KAAAAHgAAACEAAAAAAAAAGAAAAE0BAABOAQAAGwAAAIAzcQBkUJsC1zNxAHBQmw"
-                                 "IAAAEBl-Umfg==")};
+        engine::Hint::FromBase64("miAFgGP7B4DNBQAAAAAAAE0BAAAAAAAAdAoAAAAAAABbMfBEIyoAALrBAAAlAQAAVQl7AGuDBQNAQg8AgIQeAAAAAQGHyYuu"),
+        engine::Hint::FromBase64("miAFgGP7B4DNBQAAAAAAAE0BAAAAAAAAdAoAAAAAAABbMfBEIyoAALrBAAAlAQAAVQl7AGuDBQPAxi0AAAk9AAAAAQGHyYuu"),
+        engine::Hint::FromBase64("miAFgGP7B4DNBQAAAAAAAE0BAAAAAAAAdAoAAAAAAABbMfBEIyoAALrBAAAlAQAAVQl7AGuDBQNAS0wAgI1bAAAAAQGHyYuu")};
     RouteParameters reference_4{false,
                                 false,
                                 false,
@@ -158,9 +152,9 @@ BOOST_AUTO_TEST_CASE(valid_route_urls)
                                 std::vector<boost::optional<engine::Bearing>>{}};
     auto result_4 = parseParameters<RouteParameters>(
         "1,2;3,4?steps=false&hints="
-        "DAIAgP___38AAAAAAAAAAAIAAAAAAAAAEAAAAOgDAAD0AwAAGwAAAOUacQBQP5sCshpxAB0_mwIAAAEBl-Umfg==;"
-        "cgAAgP___39jAAAADgAAACIAAABeAAAAkQAAANoDAABOAgAAGwAAAFVGcQCiRJsCR0VxAOZFmwIFAAEBl-Umfg==;"
-        "3gAAgP___39KAAAAHgAAACEAAAAAAAAAGAAAAE0BAABOAQAAGwAAAIAzcQBkUJsC1zNxAHBQmwIAAAEBl-Umfg==");
+        "miAFgGP7B4DNBQAAAAAAAE0BAAAAAAAAdAoAAAAAAABbMfBEIyoAALrBAAAlAQAAVQl7AGuDBQNAQg8AgIQeAAAAAQGHyYuu;"
+        "miAFgGP7B4DNBQAAAAAAAE0BAAAAAAAAdAoAAAAAAABbMfBEIyoAALrBAAAlAQAAVQl7AGuDBQPAxi0AAAk9AAAAAQGHyYuu;"
+        "miAFgGP7B4DNBQAAAAAAAE0BAAAAAAAAdAoAAAAAAABbMfBEIyoAALrBAAAlAQAAVQl7AGuDBQNAS0wAgI1bAAAAAQGHyYuu");
     BOOST_CHECK(result_4);
     BOOST_CHECK_EQUAL(reference_4.steps, result_4->steps);
     BOOST_CHECK_EQUAL(reference_4.alternatives, result_4->alternatives);
@@ -171,6 +165,7 @@ BOOST_AUTO_TEST_CASE(valid_route_urls)
     CHECK_EQUAL_RANGE(reference_4.bearings, result_4->bearings);
     CHECK_EQUAL_RANGE(reference_4.radiuses, result_4->radiuses);
     CHECK_EQUAL_RANGE(reference_4.coordinates, result_4->coordinates);
+        
     CHECK_EQUAL_RANGE(reference_4.hints, result_4->hints);
 
     std::vector<boost::optional<engine::Bearing>> bearings_4 = {
@@ -255,13 +250,9 @@ BOOST_AUTO_TEST_CASE(valid_route_urls)
                                               {util::FloatLongitude{5}, util::FloatLatitude{6}},
                                               {util::FloatLongitude{7}, util::FloatLatitude{8}}};
     std::vector<boost::optional<engine::Hint>> hints_10 = {
-        engine::Hint::FromBase64("DAIAgP___"
-                                 "38AAAAAAAAAAAIAAAAAAAAAEAAAAOgDAAD0AwAAGwAAAOUacQBQP5sCshpxAB0_"
-                                 "mwIAAAEBl-Umfg=="),
+        engine::Hint::FromBase64("miAFgGP7B4DNBQAAAAAAAE0BAAAAAAAAdAoAAAAAAABbMfBEIyoAALrBAAAlAQAAVQl7AGuDBQNAQg8AgIQeAAAAAQGHyYuu"),
         boost::none,
-        engine::Hint::FromBase64("cgAAgP___"
-                                 "39jAAAADgAAACIAAABeAAAAkQAAANoDAABOAgAAGwAAAFVGcQCiRJsCR0VxAOZFmw"
-                                 "IFAAEBl-Umfg=="),
+        engine::Hint::FromBase64("miAFgGP7B4DNBQAAAAAAAE0BAAAAAAAAdAoAAAAAAABbMfBEIyoAALrBAAAlAQAAVQl7AGuDBQPAxi0AAAk9AAAAAQGHyYuu"),
         boost::none};
     RouteParameters reference_10{false,
                                  false,
@@ -275,8 +266,8 @@ BOOST_AUTO_TEST_CASE(valid_route_urls)
                                  std::vector<boost::optional<engine::Bearing>>{}};
     auto result_10 = parseParameters<RouteParameters>(
         "1,2;3,4;5,6;7,8?steps=false&hints="
-        "DAIAgP___38AAAAAAAAAAAIAAAAAAAAAEAAAAOgDAAD0AwAAGwAAAOUacQBQP5sCshpxAB0_mwIAAAEBl-Umfg==;;"
-        "cgAAgP___39jAAAADgAAACIAAABeAAAAkQAAANoDAABOAgAAGwAAAFVGcQCiRJsCR0VxAOZFmwIFAAEBl-Umfg=="
+        "miAFgGP7B4DNBQAAAAAAAE0BAAAAAAAAdAoAAAAAAABbMfBEIyoAALrBAAAlAQAAVQl7AGuDBQNAQg8AgIQeAAAAAQGHyYuu;;"
+        "miAFgGP7B4DNBQAAAAAAAE0BAAAAAAAAdAoAAAAAAABbMfBEIyoAALrBAAAlAQAAVQl7AGuDBQPAxi0AAAk9AAAAAQGHyYuu"
         ";");
     BOOST_CHECK(result_10);
     BOOST_CHECK_EQUAL(reference_10.steps, result_10->steps);
