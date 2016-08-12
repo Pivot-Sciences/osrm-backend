@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(long_road_test)
     CompressedEdgeContainer container;
 
     std::vector<InputEdge> edges = {
-        // src, tgt, dist, edge_id, name_id, access_restricted, fwd, bkwd, roundabout, travel_mode
+        // src, tgt, dist, edge_id, name_id, access_restricted, fwd, bkwd, roundabout, travel_mode, distance_data
         {0,
          1,
          1,
@@ -40,7 +40,8 @@ BOOST_AUTO_TEST_CASE(long_road_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {1,
          0,
          1,
@@ -51,7 +52,8 @@ BOOST_AUTO_TEST_CASE(long_road_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {1,
          2,
          1,
@@ -62,7 +64,8 @@ BOOST_AUTO_TEST_CASE(long_road_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {2,
          1,
          1,
@@ -73,7 +76,8 @@ BOOST_AUTO_TEST_CASE(long_road_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {2,
          3,
          1,
@@ -84,7 +88,8 @@ BOOST_AUTO_TEST_CASE(long_road_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {3,
          2,
          1,
@@ -95,7 +100,8 @@ BOOST_AUTO_TEST_CASE(long_road_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {3,
          4,
          1,
@@ -106,7 +112,8 @@ BOOST_AUTO_TEST_CASE(long_road_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {4,
          3,
          1,
@@ -117,7 +124,8 @@ BOOST_AUTO_TEST_CASE(long_road_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID}};
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()}};
 
     BOOST_ASSERT(edges[0].data.IsCompatibleTo(edges[2].data));
     BOOST_ASSERT(edges[2].data.IsCompatibleTo(edges[4].data));
@@ -148,7 +156,7 @@ BOOST_AUTO_TEST_CASE(loop_test)
     CompressedEdgeContainer container;
 
     std::vector<InputEdge> edges = {
-        // src, tgt, dist, edge_id, name_id, access_restricted, fwd, bkwd, roundabout, travel_mode
+        // src, tgt, dist, edge_id, name_id, access_restricted, fwd, bkwd, roundabout, travel_mode, distance_data
         {0,
          1,
          1,
@@ -159,7 +167,8 @@ BOOST_AUTO_TEST_CASE(loop_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {0,
          5,
          1,
@@ -170,7 +179,8 @@ BOOST_AUTO_TEST_CASE(loop_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {1,
          0,
          1,
@@ -181,7 +191,8 @@ BOOST_AUTO_TEST_CASE(loop_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {1,
          2,
          1,
@@ -192,7 +203,8 @@ BOOST_AUTO_TEST_CASE(loop_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {2,
          1,
          1,
@@ -203,7 +215,8 @@ BOOST_AUTO_TEST_CASE(loop_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {2,
          3,
          1,
@@ -214,7 +227,8 @@ BOOST_AUTO_TEST_CASE(loop_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {3,
          2,
          1,
@@ -225,7 +239,8 @@ BOOST_AUTO_TEST_CASE(loop_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {3,
          4,
          1,
@@ -236,7 +251,8 @@ BOOST_AUTO_TEST_CASE(loop_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {4,
          3,
          1,
@@ -247,7 +263,8 @@ BOOST_AUTO_TEST_CASE(loop_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {4,
          5,
          1,
@@ -258,7 +275,8 @@ BOOST_AUTO_TEST_CASE(loop_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {5,
          0,
          1,
@@ -269,7 +287,8 @@ BOOST_AUTO_TEST_CASE(loop_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {5,
          4,
          1,
@@ -280,7 +299,8 @@ BOOST_AUTO_TEST_CASE(loop_test)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
     };
 
     BOOST_ASSERT(edges.size() == 12);
@@ -323,7 +343,7 @@ BOOST_AUTO_TEST_CASE(t_intersection)
     CompressedEdgeContainer container;
 
     std::vector<InputEdge> edges = {
-        // src, tgt, dist, edge_id, name_id, access_restricted, fwd, bkwd, roundabout, travel_mode
+        // src, tgt, dist, edge_id, name_id, access_restricted, fwd, bkwd, roundabout, travel_mode, distance_data
         {0,
          1,
          1,
@@ -334,7 +354,8 @@ BOOST_AUTO_TEST_CASE(t_intersection)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {1,
          0,
          1,
@@ -345,7 +366,8 @@ BOOST_AUTO_TEST_CASE(t_intersection)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {1,
          2,
          1,
@@ -356,7 +378,8 @@ BOOST_AUTO_TEST_CASE(t_intersection)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {1,
          3,
          1,
@@ -367,7 +390,8 @@ BOOST_AUTO_TEST_CASE(t_intersection)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {2,
          1,
          1,
@@ -378,7 +402,8 @@ BOOST_AUTO_TEST_CASE(t_intersection)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {3,
          1,
          1,
@@ -389,7 +414,8 @@ BOOST_AUTO_TEST_CASE(t_intersection)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
     };
 
     BOOST_ASSERT(edges[0].data.IsCompatibleTo(edges[1].data));
@@ -419,7 +445,7 @@ BOOST_AUTO_TEST_CASE(street_name_changes)
     CompressedEdgeContainer container;
 
     std::vector<InputEdge> edges = {
-        // src, tgt, dist, edge_id, name_id, access_restricted, fwd, bkwd, roundabout, travel_mode
+        // src, tgt, dist, edge_id, name_id, access_restricted, fwd, bkwd, roundabout, travel_mode, distance_data
         {0,
          1,
          1,
@@ -430,7 +456,8 @@ BOOST_AUTO_TEST_CASE(street_name_changes)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {1,
          0,
          1,
@@ -441,7 +468,8 @@ BOOST_AUTO_TEST_CASE(street_name_changes)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {1,
          2,
          1,
@@ -452,7 +480,8 @@ BOOST_AUTO_TEST_CASE(street_name_changes)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {2,
          1,
          1,
@@ -463,7 +492,8 @@ BOOST_AUTO_TEST_CASE(street_name_changes)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
     };
 
     BOOST_ASSERT(edges[0].data.IsCompatibleTo(edges[1].data));
@@ -489,7 +519,7 @@ BOOST_AUTO_TEST_CASE(direction_changes)
     CompressedEdgeContainer container;
 
     std::vector<InputEdge> edges = {
-        // src, tgt, dist, edge_id, name_id, access_restricted, fwd, bkwd, roundabout, travel_mode
+        // src, tgt, dist, edge_id, name_id, access_restricted, fwd, bkwd, roundabout, travel_mode, distance_data
         {0,
          1,
          1,
@@ -500,7 +530,8 @@ BOOST_AUTO_TEST_CASE(direction_changes)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {1,
          0,
          1,
@@ -511,7 +542,8 @@ BOOST_AUTO_TEST_CASE(direction_changes)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {1,
          2,
          1,
@@ -522,7 +554,8 @@ BOOST_AUTO_TEST_CASE(direction_changes)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
         {2,
          1,
          1,
@@ -533,7 +566,8 @@ BOOST_AUTO_TEST_CASE(direction_changes)
          false,
          true,
          TRAVEL_MODE_INACCESSIBLE,
-         INVALID_LANE_DESCRIPTIONID},
+         INVALID_LANE_DESCRIPTIONID,
+         DistanceData()},
     };
 
     Graph graph(5, edges);
