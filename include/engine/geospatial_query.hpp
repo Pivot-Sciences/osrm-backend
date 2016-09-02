@@ -365,22 +365,45 @@ template <typename RTreeT, typename DataFacadeT> class GeospatialQuery
                                                                 point_on_segment,
                                                                 ratio);
 
+        ratio = std::min(1.0, std::max(0.0, ratio));
+
+        std::vector<NodeID> forward_node_vector;
+        std::vector<NodeID> reverse_node_vector;
+
+        if (data.forward_packed_geometry_id != SPECIAL_EDGEID) {
+            datafacade.GetUncompressedGeometry(data.forward_packed_geometry_id,
+                                                forward_node_vector);
+        }
+
+        if (data.reverse_packed_geometry_id != SPECIAL_EDGEID) {
+            datafacade.GetUncompressedGeometry(data.reverse_packed_geometry_id,
+                                              reverse_node_vector);
+        }
+
         // Find the node-based-edge that this belongs to, and directly
         // calculate the forward_weight, forward_offset, reverse_weight, reverse_offset
 
         int forward_offset = 0, forward_weight = 0;
         int reverse_offset = 0, reverse_weight = 0;
+        DistanceData forward_distance_data = DistanceData();
+        DistanceData reverse_distance_data = DistanceData(); 
 
         if (data.forward_packed_geometry_id != SPECIAL_EDGEID)
         {
             std::vector<EdgeWeight> forward_weight_vector;
             datafacade.GetUncompressedWeights(data.forward_packed_geometry_id,
                                               forward_weight_vector);
+            auto prev_coord = data.reverse_packed_geometry_id != SPECIAL_EDGEID ? coordinates[reverse_node_vector.back()] : coordinates[forward_node_vector.front()];
             for (std::size_t i = 0; i < data.fwd_segment_position; i++)
             {
                 forward_offset += forward_weight_vector[i];
+                auto coordinate = datafacade.GetCoordinateOfNode(forward_node_vector[i]);
+                forward_distance_data += util::coordinate_calculation::greatCircleDistance(prev_coord, coordinate);
+                prev_coord = coordinate;
             }
             forward_weight = forward_weight_vector[data.fwd_segment_position];
+            DistanceData shared_dist = util::coordinate_calculation::greatCircleDistance(prev_coord, datafacade.GetCoordinateOfNode(forward_node_vector[data.fwd_segment_position]));
+            forward_distance_data += ratio * shared_dist;
         }
 
         if (data.reverse_packed_geometry_id != SPECIAL_EDGEID)
@@ -391,17 +414,22 @@ template <typename RTreeT, typename DataFacadeT> class GeospatialQuery
 
             BOOST_ASSERT(data.fwd_segment_position < reverse_weight_vector.size());
 
+            auto prev_coord = data.forward_packed_geometry_id != SPECIAL_EDGEID ? coordinates[forward_node_vector.back()] : coordinates[reverse_node_vector.front()];
+            std::size_t reverse_segment_position = reverse_weight_vector.size() - data.fwd_segment_position - 1;
             for (std::size_t i = 0;
-                 i < reverse_weight_vector.size() - data.fwd_segment_position - 1;
+                 i < reverse_segment_position;
                  i++)
             {
                 reverse_offset += reverse_weight_vector[i];
+                auto coordinate = datafacade.GetCoordinateOfNode(reverse_node_vector[i]);
+                reverse_distance_data += util::coordinate_calculation::greatCircleDistance(prev_coord, coordinate);
+                prev_coord = coordinate;
             }
-            reverse_weight =
-                reverse_weight_vector[reverse_weight_vector.size() - data.fwd_segment_position - 1];
+            reverse_weight = reverse_weight_vector[reverse_segment_position];
+            DistanceData shared_dist = util::coordinate_calculation::greatCircleDistance(prev_coord, datafacade.GetCoordinateOfNode(reverse_node_vector[reverse_segment_position]));
+            reverse_distance_data += (1.0 - ratio) * shared_dist;
         }
 
-        ratio = std::min(1.0, std::max(0.0, ratio));
         if (data.forward_segment_id.id != SPECIAL_SEGMENTID)
         {
             forward_weight *= ratio;
@@ -414,8 +442,10 @@ template <typename RTreeT, typename DataFacadeT> class GeospatialQuery
         auto transformed = PhantomNodeWithDistance{PhantomNode{data,
                                                                forward_weight,
                                                                forward_offset,
+                                                               forward_distance_data,
                                                                reverse_weight,
                                                                reverse_offset,
+                                                               reverse_distance_data,
                                                                point_on_segment,
                                                                input_coordinate},
                                                    current_perpendicular_distance};

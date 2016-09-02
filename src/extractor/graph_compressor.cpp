@@ -131,6 +131,9 @@ void GraphCompressor::Compress(const std::unordered_set<NodeID> &barrier_nodes,
             // add weight of e2's to e1
             graph.GetEdgeData(forward_e1).distance += fwd_edge_data2.distance;
             graph.GetEdgeData(reverse_e1).distance += rev_edge_data2.distance;
+	    // add distance of e2's to e1
+	    graph.GetEdgeData(forward_e1).distance_data += fwd_edge_data2.distance_data;
+            graph.GetEdgeData(reverse_e1).distance_data += rev_edge_data2.distance_data;
 
             // extend e1's to targets of e2's
             graph.SetTarget(forward_e1, node_w);

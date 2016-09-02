@@ -67,7 +67,7 @@ Status TablePlugin::HandleRequest(const api::TableParameters &params, util::json
     }
 
     api::TableAPI table_api{facade, params};
-    table_api.MakeResponse(result_table, snapped_phantoms, result);
+    table_api.MakeResponse(result_table, snapped_phantoms, result, params.output_components);
 
     return Status::Ok;
 }
