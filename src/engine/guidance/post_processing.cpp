@@ -1158,7 +1158,6 @@ std::vector<RouteStep> buildIntersections(std::vector<RouteStep> steps)
     std::size_t last_valid_instruction = 0;
     for (std::size_t step_index = 0; step_index < steps.size(); ++step_index)
     {
-        const auto next_step_index = step_index + 1;
         auto &step = steps[step_index];
         const auto instruction = step.maneuver.instruction;
         if (instruction.type == TurnType::Suppressed)
@@ -1180,7 +1179,7 @@ std::vector<RouteStep> buildIntersections(std::vector<RouteStep> steps)
             // previous instruction.
             if (instruction.type == TurnType::EndOfRoad)
             {
-                BOOST_ASSERT(step_index > 0 && next_step_index < steps.size());
+                BOOST_ASSERT(step_index > 0);
                 const auto &previous_step = steps[last_valid_instruction];
                 if (previous_step.intersections.size() < MIN_END_OF_ROAD_INTERSECTIONS)
                     step.maneuver.instruction.type = TurnType::Turn;
